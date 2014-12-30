@@ -19,7 +19,7 @@ class Phant(output.Output):
 		url = "https://data.sparkfun.com/input/" + self.PublicKey + "?private_key=" + self.PrivateKey + query_str
 		try:
 			z = requests.post(url,headers={})
-			if z.text!="": 
+			if not "1 success" in z.text: 
 				print "Phant Error: " + z.text
 				return False
 		except Exception:
