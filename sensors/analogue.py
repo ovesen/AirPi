@@ -2,17 +2,20 @@ import mcp3008
 import sensor
 class Analogue(sensor.Sensor):
 	requiredData = ["adcPin","measurement","sensorName"]
-	optionalData = ["pullUpResistance","pullDownResistance"]
+	optionalData = ["pullUpResistance","pullDownResistance","allowZero"]
 	def __init__(self, data):
 		self.adc = mcp3008.MCP3008.sharedClass
 		self.adcPin = int(data["adcPin"])
 		self.valName = data["measurement"]
 		self.sensorName = data["sensorName"]
 		self.pullUp, self.pullDown = None, None
+		self.allowZero = False
 		if "pullUpResistance" in data:
 			self.pullUp = int(data["pullUpResistance"])
 		if "pullDownResistance" in data:
 			self.pullDown = int(data["pullDownResistance"])
+		if "allowZero" in data:
+			self.allowZero = bool(data["allowZero"])
 		class ConfigError(Exception): pass
 		if self.pullUp!=None and self.pullDown!=None:
 			print "Please choose whether there is a pull up or pull down resistor for the " + self.valName + " measurement by only entering one of them into the settings file"
@@ -25,7 +28,10 @@ class Analogue(sensor.Sensor):
 		
 	def getVal(self):
 		result = self.adc.readADC(self.adcPin)
-		if result==0:
+		if result==0 and self.allowZero == True:
+			print "Allow zero for " + self.sensorName + " is allowed, zero returned"
+			return 0
+		elif result==0:
 			print "Check wiring for the " + self.sensorName + " measurement, no voltage detected on ADC input " + str(self.adcPin)
 			return None
 		if result == 1023:
